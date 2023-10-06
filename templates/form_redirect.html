@@ -1,0 +1,14 @@
+{% extends "form.html" %}
+
+{% block content %}
+
+    <h2 style="color: greenyellow">RPC Updated!</h2>
+    <h6 style="color: gray">Currently set to:
+        {% for key,value in result.items() %}
+            {% if key == "song" %}
+                    {{ value }}
+                {% endif %}
+        {% endfor %}
+    </h6>
+
+{% endblock %}

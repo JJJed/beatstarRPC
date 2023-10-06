@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BeatstarRPC Web Panel</title>
+    <style>
+        html {
+            background-color: black;
+        }
+        h1 {
+            color: white;
+        }
+        input {
+            background-color: gray;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>BeatstarRPC Web Panel</h1>
+
+    {% block content %}{% endblock %}
+
+    <form id="form" method="post">
+        {{form.song.label}}<br>
+        {{form.song(size=100, list="id_datalist", value=songValue)}}
+        <datalist id="id_datalist">
+        {% for i in range(0, 519) %}
+        <option value="{{ dl[i] }}">
+        {% endfor %}
+        </datalist>
+        <br><br>
+        {{form.submit()}}
+    </form>
+</body>
+</html>
