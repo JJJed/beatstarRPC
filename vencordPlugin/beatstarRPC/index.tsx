@@ -146,7 +146,8 @@ async function createActivity(): Promise<Activity | undefined> {
     var buttonOneText = await response4.text().then(result => result);
     const response5 = await fetch('https://beatstarrpc.jeddev.net/buttonOneURL', requestOptions);
     var buttonOneURL = await response5.text().then(result => result);
-
+    var buttonTwoText = "beatstarRPC GitHub Repo"
+    var buttonTwoURL = "https://github.com/JJJed/beatstarRPC"
 
     if (!appName) return;
 
@@ -162,13 +163,13 @@ async function createActivity(): Promise<Activity | undefined> {
     if (buttonOneText) {
         activity.buttons = [
             buttonOneText,
-            undefined
+            buttonTwoText
         ].filter(isTruthy);
 
         activity.metadata = {
             button_urls: [
                 buttonOneURL,
-                undefined
+                buttonTwoURL
             ].filter(isTruthy)
         };
     }
