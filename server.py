@@ -1,5 +1,4 @@
 from flask import *
-import requests
 from forms import SongForm
 from data import dl, multi_dict
 from werkzeug.datastructures import Headers
