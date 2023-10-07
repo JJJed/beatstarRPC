@@ -67,7 +67,7 @@ def update_rpc():
         y = True
     except KeyError as e:
         y = False
-    if y == True:
+    if y:
         if session['username'] == os.environ["AUTH"]:
             form = SongForm()
             if form.is_submitted():

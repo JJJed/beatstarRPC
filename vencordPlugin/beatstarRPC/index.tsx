@@ -82,46 +82,9 @@ const enum TimestampMode {
     CUSTOM,
 }
 
-const settings = definePluginSettings({
-    type: {
-        type: OptionType.SELECT,
-        description: "Activity type",
-        onChange: onChange,
-        options: [
-            {
-                label: "Playing",
-                value: ActivityType.PLAYING,
-                default: true
-            },
-            {
-                label: "Streaming",
-                value: ActivityType.STREAMING
-            },
-            {
-                label: "Listening",
-                value: ActivityType.LISTENING
-            },
-            {
-                label: "Watching",
-                value: ActivityType.WATCHING
-            },
-            {
-                label: "Competing",
-                value: ActivityType.COMPETING
-            }
-        ]
-    }
-});
-
 function onChange() {
     setRpc(true);
     if (Settings.plugins.BeatstarRPC.enabled) setRpc();
-}
-
-function isImageKeyValid(value: string) {
-    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
-    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
-    return true;
 }
 
 async function createActivity(): Promise<Activity | undefined> {
@@ -133,21 +96,21 @@ async function createActivity(): Promise<Activity | undefined> {
 
     var appID = "1157305973849989233";
     var appName = "Beatstar";
-    var type = settings.store.type;
-    const response0 = await fetch('https://beatstarrpc.jeddev.net/details', requestOptions);
+    var type = ActivityType.PLAYING;
+    const response0 = await fetch('http://127.0.0.1:5000/details', requestOptions);
     var details = await response0.text().then(result => result);
-    const response1 = await fetch('https://beatstarrpc.jeddev.net/state', requestOptions);
+    const response1 = await fetch('http://127.0.0.1:5000/state', requestOptions);
     var state = await response1.text().then(result => result);
-    const response2 = await fetch('https://beatstarrpc.jeddev.net/imageBig', requestOptions);
+    const response2 = await fetch('http://127.0.0.1:5000/imageBig', requestOptions);
     var imageBig = await response2.text().then(result => result);
-    const response3 = await fetch('https://beatstarrpc.jeddev.net/imageSmall', requestOptions);
+    const response3 = await fetch('http://127.0.0.1:5000/imageSmall', requestOptions);
     var imageSmall = await response3.text().then(result => result);
-    const response4 = await fetch('https://beatstarrpc.jeddev.net/buttonOneText', requestOptions);
+    const response4 = await fetch('http://127.0.0.1:5000/buttonOneText', requestOptions);
     var buttonOneText = await response4.text().then(result => result);
-    const response5 = await fetch('https://beatstarrpc.jeddev.net/buttonOneURL', requestOptions);
+    const response5 = await fetch('http://127.0.0.1:5000/buttonOneURL', requestOptions);
     var buttonOneURL = await response5.text().then(result => result);
-    var buttonTwoText = "beatstarRPC GitHub Repo"
-    var buttonTwoURL = "https://github.com/JJJed/beatstarRPC"
+    var buttonTwoText = "beatstarRPC GitHub Repo";
+    var buttonTwoURL = "https://github.com/JJJed/beatstarRPC";
 
     if (!appName) return;
 
@@ -231,21 +194,13 @@ export default definePlugin({
     ],
     start: setRpc,
     stop: () => setRpc(true),
-    settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         return (
             <>
                 <Forms.FormText>
-                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to create an application and
-                    get the application ID.
-                </Forms.FormText>
-                <Forms.FormText>
-                    Upload images in the Rich Presence tab to get the image keys.
-                </Forms.FormText>
-                <Forms.FormText>
-                    If you want to use image link, download your image and reupload the image to <Link href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select "Copy image address".
+                    <a href="https://github.com/JJJed/beatstarRPC/tree/master">beatstarRPC GitHub Repo</a>
                 </Forms.FormText>
                 <Forms.FormDivider />
                 <div style={{ width: "284px" }} className={Colors.profileColors}>
