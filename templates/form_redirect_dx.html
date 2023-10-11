@@ -1,8 +1,8 @@
-{% extends "form.html" %}
+{% extends "form_dx.html" %}
 
 {% block content %}
 
-    {% if valid == True %}
+    {% if valid == 0 %}
         <h2 style="color: greenyellow">RPC Updated!</h2>
         <h6 style="color: gray">Currently set to:
             {% for key,value in result.items() %}
@@ -13,8 +13,11 @@
         </h6>
     {% endif %}
 
-    {% if valid == False %}
+    {% if valid == 1 %}
         <h2 style="color: red">Error! Invalid song name.</h2>
+    {% endif %}
+    {% if valid == 2 %}
+        <h2 style="color: red">Error! Song does not have a deluxe edition.</h2>
     {% endif %}
 
 {% endblock %}

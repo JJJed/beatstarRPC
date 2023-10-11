@@ -16,14 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
-import { Link } from "@components/Link";
-import { Devs } from "@utils/constants";
-import { isTruthy } from "@utils/guards";
-import { useAwaiter } from "@utils/react";
-import definePlugin, { OptionType } from "@utils/types";
-import { filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildStore, React, SelectedChannelStore, SelectedGuildStore, UserStore } from "@webpack/common";
+import {definePluginSettings, Settings} from "@api/Settings";
+import {Link} from "@components/Link";
+import {Devs} from "@utils/constants";
+import {isTruthy} from "@utils/guards";
+import {useAwaiter} from "@utils/react";
+import definePlugin, {OptionType} from "@utils/types";
+import {filters, findByCodeLazy, findByPropsLazy, mapMangledModuleLazy} from "@webpack";
+import {
+    FluxDispatcher,
+    Forms,
+    GuildStore,
+    React,
+    SelectedChannelStore,
+    SelectedGuildStore,
+    UserStore
+} from "@webpack/common";
 
 const ActivityComponent = findByCodeLazy("onOpenGameProfile");
 const ActivityClassName = findByPropsLazy("activity", "buttonColor");
@@ -82,35 +90,75 @@ const enum TimestampMode {
     CUSTOM,
 }
 
+const settings = definePluginSettings({
+    type: {
+        type: OptionType.SELECT,
+        description: "Activity type",
+        onChange: onChange,
+        options: [
+            {
+                label: "Playing",
+                value: ActivityType.PLAYING,
+                default: true
+            },
+            {
+                label: "Streaming",
+                value: ActivityType.STREAMING
+            },
+            {
+                label: "Listening",
+                value: ActivityType.LISTENING
+            },
+            {
+                label: "Watching",
+                value: ActivityType.WATCHING
+            },
+            {
+                label: "Competing",
+                value: ActivityType.COMPETING
+            }
+        ]
+    }
+});
+
 function onChange() {
     setRpc(true);
     if (Settings.plugins.BeatstarRPC.enabled) setRpc();
 }
 
+function isImageKeyValid(value: string) {
+    if (/https?:\/\/(?!i\.)?imgur\.com\//.test(value)) return "Imgur link must be a direct link to the image. (e.g. https://i.imgur.com/...)";
+    if (/https?:\/\/(?!media\.)?tenor\.com\//.test(value)) return "Tenor link must be a direct link to the image. (e.g. https://media.tenor.com/...)";
+    return true;
+}
+
 async function createActivity(): Promise<Activity | undefined> {
 
     const requestOptions: RequestInit = {
-        keepalive: true,
         mode: "cors"
     };
 
-    var appID = "1157305973849989233";
-    var appName = "Beatstar";
-    var type = ActivityType.PLAYING;
-    const response0 = await fetch('http://127.0.0.1:5000/details', requestOptions);
-    var details = await response0.text().then(result => result);
-    const response1 = await fetch('http://127.0.0.1:5000/state', requestOptions);
-    var state = await response1.text().then(result => result);
-    const response2 = await fetch('http://127.0.0.1:5000/imageBig', requestOptions);
-    var imageBig = await response2.text().then(result => result);
-    const response3 = await fetch('http://127.0.0.1:5000/imageSmall', requestOptions);
-    var imageSmall = await response3.text().then(result => result);
-    const response4 = await fetch('http://127.0.0.1:5000/buttonOneText', requestOptions);
-    var buttonOneText = await response4.text().then(result => result);
-    const response5 = await fetch('http://127.0.0.1:5000/buttonOneURL', requestOptions);
-    var buttonOneURL = await response5.text().then(result => result);
-    var buttonTwoText = "beatstarRPC GitHub Repo";
-    var buttonTwoURL = "https://github.com/JJJed/beatstarRPC";
+    const response0 = await fetch('127.0.0.1:5000/appID', requestOptions);
+    var appID = await response0.text().then(result => result);
+    const response1 = await fetch('127.0.0.1:5000/appName', requestOptions);
+    var appName = await response1.text().then(result => result);
+    var type = settings.store.type;
+    const response2 = await fetch('127.0.0.1:5000/details', requestOptions);
+    var details = await response2.text().then(result => result);
+    const response3 = await fetch('127.0.0.1:5000/state', requestOptions);
+    var state = await response3.text().then(result => result);
+    const response4 = await fetch('127.0.0.1:5000/imageBig', requestOptions);
+    var imageBig = await response4.text().then(result => result);
+    const response5 = await fetch('127.0.0.1:5000/imageSmall', requestOptions);
+    var imageSmall = await response5.text().then(result => result);
+    const response6 = await fetch('127.0.0.1:5000/buttonOneText', requestOptions);
+    var buttonOneText = await response6.text().then(result => result);
+    const response7 = await fetch('127.0.0.1:5000/buttonOneURL', requestOptions);
+    var buttonOneURL = await response7.text().then(result => result);
+    const response8 = await fetch('127.0.0.1:5000/buttonTwoText', requestOptions);
+    var buttonTwoText = await response8.text().then(result => result);
+    const response9 = await fetch('127.0.0.1:5000/buttonTwoURL', requestOptions);
+    var buttonTwoURL = await response9.text().then(result => result);
 
     if (!appName) return;
 
@@ -174,15 +222,19 @@ async function setRpc(disable?: boolean) {
     });
 }
 
-setInterval(function () {
-    setRpc();
-}, 5000);
+var rpc_interval;
 
-// @ts-ignore
-// @ts-ignore
-// @ts-ignore
-// @ts-ignore
-// @ts-ignore
+async function startRpc() {
+    rpc_interval = setInterval(function () {
+        setRpc();
+    }, 5000);
+}
+
+async function stopRpc() {
+    clearInterval(rpc_interval);
+    setRpc(true);
+}
+
 export default definePlugin({
     name: "BeatstarRPC",
     description: "Allows you to set a detailed Beatstar rich presence.",
@@ -192,22 +244,34 @@ export default definePlugin({
             name: "Jed"
         }
     ],
-    start: setRpc,
-    stop: () => setRpc(true),
+    start: startRpc,
+    stop: stopRpc,
+    settings,
 
     settingsAboutComponent: () => {
         const activity = useAwaiter(createActivity);
         return (
             <>
                 <Forms.FormText>
-                    <a href="https://github.com/JJJed/beatstarRPC/tree/master">beatstarRPC GitHub Repo</a>
+                    Go to <Link href="https://discord.com/developers/applications">Discord Deverloper Portal</Link> to
+                    create an application and
+                    get the application ID.
                 </Forms.FormText>
-                <Forms.FormDivider />
-                <div style={{ width: "284px" }} className={Colors.profileColors}>
-                    {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity} channelId={SelectedChannelStore.getChannelId()}
-                        guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
-                        application={{ id: "1157305973849989233" }}
-                        user={UserStore.getCurrentUser()} />}
+                <Forms.FormText>
+                    Upload images in the Rich Presence tab to get the image keys.
+                </Forms.FormText>
+                <Forms.FormText>
+                    If you want to use image link, download your image and reupload the image to <Link
+                    href="https://imgur.com">Imgur</Link> and get the image link by right-clicking the image and select
+                    "Copy image address".
+                </Forms.FormText>
+                <Forms.FormDivider/>
+                <div style={{width: "284px"}} className={Colors.profileColors}>
+                    {activity[0] && <ActivityComponent activity={activity[0]} className={ActivityClassName.activity}
+                                                       channelId={SelectedChannelStore.getChannelId()}
+                                                       guild={GuildStore.getGuild(SelectedGuildStore.getLastSelectedGuildId())}
+                                                       application={{id: "1157305973849989233"}}
+                                                       user={UserStore.getCurrentUser()}/>}
                 </div>
             </>
         );
