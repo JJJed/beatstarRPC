@@ -2,8 +2,7 @@
 ___
 ## Description
 beatstarRPC is a web panel to post Beatstar activity 
-to your Discord profile. Note: Deluxe songs will be
-added in the near future.
+to your Discord profile. Note: I finished programming everything for Deluxe songs, I'll be adding them to this repo shortly (once I get everything working for localhost).
 ## Installation
 
 ### Requirements
